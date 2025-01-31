@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import itertools
+import numpy as np
 
 # Função para calcular a probabilidade de uma sequência
 def calcular_probabilidade_sequencia(sequencia, probabilidade_numeros):
@@ -34,18 +35,20 @@ def main():
         total_sorteios = len(df)
         probabilidade_numeros = contagem_numeros / total_sorteios
 
-        # Passo 3: Gerar todas as combinações possíveis de 15 números (conjunto de 15 números do 1 ao 25)
-        numeros_disponiveis = range(1, 26)  # Números de 1 a 25
-        combinacoes_possiveis = itertools.combinations(numeros_disponiveis, 15)
+        # Passo 3: Selecionar os 20 números mais frequentes para reduzir o número de combinações
+        numeros_mais_frequentes = probabilidade_numeros.nlargest(20).index
 
-        # Passo 4: Calcular a probabilidade de todas as combinações
+        # Passo 4: Gerar todas as combinações possíveis de 15 números a partir dos 20 mais frequentes
+        combinacoes_possiveis = itertools.combinations(numeros_mais_frequentes, 15)
+
+        # Passo 5: Calcular a probabilidade de todas as combinações
         sequencias_com_probabilidade = []
 
         for combinacao in combinacoes_possiveis:
             probabilidade = calcular_probabilidade_sequencia(combinacao, probabilidade_numeros)
             sequencias_com_probabilidade.append((combinacao, probabilidade))
 
-        # Passo 5: Ordenar as sequências por probabilidade e pegar as 5 maiores
+        # Passo 6: Ordenar as sequências por probabilidade e pegar as 5 maiores
         sequencias_com_probabilidade.sort(key=lambda x: x[1], reverse=True)
 
         # Exibir as 5 sequências com maior probabilidade
@@ -56,7 +59,7 @@ def main():
         st.write("Top 5 Sequências com Maior Probabilidade:")
         st.dataframe(sequencias_df)
 
-        # Passo 6: Exportar os dados em CSV
+        # Passo 7: Exportar os dados em CSV
         st.download_button(
             label="Baixar Resultados em CSV",
             data=sequencias_df.to_csv(index=False).encode('utf-8'),
